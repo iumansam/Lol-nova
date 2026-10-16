@@ -3,11 +3,12 @@ import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/tmdb_apis.dart';
+import '../../../../core/constants/app_secrets.dart';
 
 /// Servicio de Home alimentado por la API de TMDB.
 /// Aplica las preferencias de ConfigPage (SharedPreferences).
 ///
-/// API key: a2d9bbed370d9f678e34006f8750a5a5
+/// API key: TMDB_API_KEY (dart-define)
 ///
 /// Idiomas de la app (español latino / castellano / inglés) controlan el
 /// parámetro `language` de TMDB (títulos, sinopsis, etc.), NO filtran por
@@ -15,7 +16,7 @@ import '../../../../core/constants/tmdb_apis.dart';
 ///
 /// Regionalización: solo excluye contenido asiático / indio / ruso.
 class TmdbHomeService {
-  static const String _apiKeyFallback = 'a2d9bbed370d9f678e34006f8750a5a5'; // unused fallback
+  static const String _apiKeyFallback = AppSecrets.tmdbApiKey; // unused fallback
   static const String _base = 'https://api.themoviedb.org/3';
   static const String _imgBase = 'https://image.tmdb.org/t/p';
 

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as enc;
+import '../../../core/constants/app_secrets.dart';
 
 /// Servicio que scrapea enlaces desde SeriesKao / Xupalace (Embed69)
 class Embed69Service {
@@ -11,7 +12,7 @@ class Embed69Service {
 
   static const _kBaseUrlSeriesKao = 'https://serieskao.top/vidurl/';
   static const _kBaseUrlXupalace = 'https://xupalace.org/video/';
-  static const _kTmdbApiKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const _kTmdbApiKey = AppSecrets.tmdbApiKey;
   static const _kTmdbBase = 'https://api.themoviedb.org/3';
 
   // Usado como fallback cuando TMDB no tiene el imdb_id mapeado

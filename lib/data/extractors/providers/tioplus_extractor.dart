@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../../../core/constants/app_secrets.dart';
 
-const _kTmdbApiKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+const _kTmdbApiKey = AppSecrets.tmdbApiKey;
 const _kTmdbBase = 'https://api.themoviedb.org/3';
 const _kTioplusBase = 'https://tioplus.app';
 

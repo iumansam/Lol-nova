@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/tmdb_apis.dart';
+import '../../../../core/constants/app_secrets.dart';
 
 /// Servicio de búsqueda alimentado por la API de TMDB.
 /// Respeta las preferencias de ConfigPage (SharedPreferences),
@@ -12,9 +13,9 @@ import '../../../../core/constants/tmdb_apis.dart';
 /// - Más sensible con queries cortas
 /// - Encuentra títulos originales / japoneses / inglés / español
 ///
-/// API key: a2d9bbed370d9f678e34006f8750a5a5
+/// API key: TMDB_API_KEY (dart-define)
 class TmdbSearchService {
-  static const String _apiKeyFallback = 'a2d9bbed370d9f678e34006f8750a5a5'; // unused fallback
+  static const String _apiKeyFallback = AppSecrets.tmdbApiKey; // unused fallback
   static const String _base = 'https://api.themoviedb.org/3';
   static const String _imgBase = 'https://image.tmdb.org/t/p';
 

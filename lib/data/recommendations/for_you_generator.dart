@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../ai/ai_client.dart';
 import 'history_signals.dart';
 import 'user_taste_profile.dart';
+import '../../core/constants/app_secrets.dart';
 
 /// Candidato crudo del modelo.
 class ForYouCandidate {
@@ -78,7 +79,7 @@ class ForYouGenerator {
   static const _cacheKey = 'for_you_recs_v1';
   static const _marksKey = 'for_you_marks_v1';
   static const howMany = 20;
-  static const tmdbApiKeyFallback = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const tmdbApiKeyFallback = AppSecrets.tmdbApiKey;
 
   final AiClient ai;
   final String? tmdbApiKey;

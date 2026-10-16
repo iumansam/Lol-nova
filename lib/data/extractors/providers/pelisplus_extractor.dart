@@ -8,10 +8,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../../../core/constants/app_secrets.dart';
 
 class PelisPlusService {
   static const String _baseUrl = 'https://www.pelisplushd.la';
-  static const String _tmdbApiKey = '439c478a771f35c05022f9feabcca01c';
+  static const String _tmdbApiKey = AppSecrets.tmdbApiKey;
   static const String _userAgent =
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
   static const Duration _timeout = Duration(seconds: 12);

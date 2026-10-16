@@ -1,0 +1,139 @@
+name: Build LOL Nova (debug APK)
+
+# Manual a propósito: compilamos solo bajo demanda (el APK no se distribuye).
+on:
+  workflow_dispatch:
+    inputs:
+      require_tmdb_key:
+        description: 'Falla si no hay secret TMDB_API_KEY configurado'
+        type: boolean
+        default: false
+      upload_artifact:
+        description: 'Subir el APK debug como artefacto del workflow'
+        type: boolean
+        default: true
+
+# Un solo build por rama a la vez.
+concurrency:
+  group: lol-nova-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Versiones fijadas. Flutter 3.47.6 incluye Dart 3.13.5 y cumple
+  # el constraint del proyecto (sdk: ^3.13.4 / flutter: >=3.47.0).
+  FLUTTER_VERSION: '3.47.6'
+  FLUTTER_CHANNEL: 'stable'
+  JAVA_VERSION: '17'
+  # applicationId esperado en el APK resultante.
+  EXPECTED_APPLICATION_ID: 'com.harlyn.lolnova'
+  EXPECTED_APP_LABEL: 'LOL Nova'
+
+jobs:
+  build:
+    name: analyze + test + APK debug
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: flutter doctor
+        run: flutter doctor -v
+
+      - name: Aceptar licencias Android (si hicieran falta)
+        run: yes | flutter doctor --android-licenses >/dev/null 2>&1 || true
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: Aviso si falta el secret TMDB_API_KEY
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          REQUIRE_TMDB_KEY: ${{ inputs.require_tmdb_key }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TMDB_API_KEY:-}" ]; then
+            echo "::warning title=Falta TMDB_API_KEY::El secret TMDB_API_KEY no está configurado. El APK compilará pero TMDB no funcionará hasta que lo añadas en Settings > Secrets and variables > Actions > New repository secret."
+          else
+            echo "TMDB_API_KEY presente (longitud ${#TMDB_API_KEY})."
+          fi
+          if [ "${REQUIRE_TMDB_KEY:-false}" = "true" ] && [ -z "${TMDB_API_KEY:-}" ]; then
+            echo "::error title=TMDB_API_KEY requerida::require_tmdb_key=true pero el secret TMDB_API_KEY está vacío."
+            exit 1
+          fi
+
+      - name: flutter analyze
+        # Infos y warnings no bloquean (código heredado); los errores sí.
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: flutter test
+        run: flutter test --reporter expanded
+
+      - name: flutter build apk (debug)
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          set -euo pipefail
+          flutter build apk --debug \
+            --dart-define=TMDB_API_KEY="${TMDB_API_KEY:-}"
+
+      - name: Verificar applicationId, etiqueta y firma del APK
+        run: |
+          set -euo pipefail
+          APK="build/app/outputs/flutter-apk/app-debug.apk"
+          if [ ! -f "$APK" ]; then
+            echo "::error::No se generó el APK en $APK"
+            exit 1
+          fi
+          echo "APK: $APK ($(du -h "$APK" | cut -f1))"
+
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          AAPT="$(find "$SDK/build-tools" -type f -name aapt 2>/dev/null | sort -V | tail -n1 || true)"
+          if [ -z "$AAPT" ]; then
+            echo "::error::No se encontró aapt en $SDK/build-tools"
+            exit 1
+          fi
+
+          "$AAPT" dump badging "$APK" > /tmp/badging.txt
+
+          PKG="$(grep -oP "^package: name='\K[^']+" /tmp/badging.txt || true)"
+          echo "applicationId detectado: '$PKG'"
+          if [ "$PKG" != "${EXPECTED_APPLICATION_ID}" ]; then
+            echo "::error::applicationId inesperado: '$PKG' (esperado '${EXPECTED_APPLICATION_ID}')"
+            exit 1
+          fi
+
+          LABEL="$(grep -oP "^application-label:'\K[^']+" /tmp/badging.txt | head -n1 || true)"
+          echo "etiqueta detectada: '$LABEL'"
+          if [ "$LABEL" != "${EXPECTED_APP_LABEL}" ]; then
+            echo "::error::Etiqueta inesperada: '$LABEL' (esperada '${EXPECTED_APP_LABEL}')"
+            exit 1
+          fi
+
+          echo "OK: applicationId=${PKG} label='${LABEL}'"
+
+      - name: Subir APK debug como artefacto
+        if: ${{ github.event.inputs.upload_artifact != 'false' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lol-nova-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

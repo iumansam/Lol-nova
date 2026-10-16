@@ -3,14 +3,15 @@ import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/tmdb_apis.dart';
+import '../../../../core/constants/app_secrets.dart';
 
 /// Servicio de Home (móvil) alimentado por TMDB.
 /// Misma lógica de preferencias/filtros que TmdbHomeService (TV),
 /// pero con estructura orientada a la UI móvil y un main_slider propio.
 ///
-/// API key: a2d9bbed370d9f678e34006f8750a5a5
+/// API key: TMDB_API_KEY (dart-define)
 class TmdbHomeMobileService {
-  static const String _apiKeyFallback = 'a2d9bbed370d9f678e34006f8750a5a5'; // unused fallback
+  static const String _apiKeyFallback = AppSecrets.tmdbApiKey; // unused fallback
   static const String _base = 'https://api.themoviedb.org/3';
   static const String _imgBase = 'https://image.tmdb.org/t/p';
 

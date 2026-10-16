@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/constants/app_secrets.dart';
 
 class ModalActores extends StatefulWidget {
   final String? imdbId;
@@ -47,7 +48,7 @@ class ModalActores extends StatefulWidget {
 }
 
 class _ModalActoresState extends State<ModalActores> {
-  static const String _tmdbKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const String _tmdbKey = AppSecrets.tmdbApiKey;
   List<Map<String, dynamic>> _cast = [];
   bool _loading = true;
   String? _error;

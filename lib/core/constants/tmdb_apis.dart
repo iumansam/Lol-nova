@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'app_secrets.dart';
 
 /// APIs TMDB de la app + API propia del usuario.
 ///
@@ -9,14 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TmdbApis {
   TmdbApis._();
 
-  /// Claves integradas de la app (añade o quita aquí).
-  static const List<String> builtInKeys = [
-    'a2d9bbed370d9f678e34006f8750a5a5',
-    '439c478a771f35c05022f9feabcca01c',
-    '1865f43a0549ca50d341dd9ab8b29f49',
-
-
-  ];
+  /// Claves integradas de la app.
+  ///
+  /// En "LOL Nova" no se versionan claves: se inyecta una única clave TMDB en
+  /// tiempo de compilación con `--dart-define=TMDB_API_KEY=...`. Si el build no
+  /// la recibe, la lista queda vacía y `getApiKey()` devolverá cadena vacía,
+  /// salvo que el usuario configure su propia API en ajustes.
+  static const List<String> builtInKeys = [AppSecrets.tmdbApiKey];
 
   static const String _kUseCustom = 'tmdb_use_custom_api';
   static const String _kCustomKey = 'tmdb_custom_api_key';

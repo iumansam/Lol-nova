@@ -39,7 +39,7 @@
     <!-- ========================================================== -->
 
     <application
-        android:label="lol"
+        android:label="LOL Nova"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:banner="@drawable/banner"

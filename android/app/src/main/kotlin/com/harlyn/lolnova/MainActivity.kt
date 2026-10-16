@@ -1,4 +1,4 @@
-package com.example.lol
+package com.harlyn.lolnova
 
 import android.content.Intent
 import android.net.Uri
@@ -18,7 +18,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.example.lol/intent"
+    private val CHANNEL = "com.harlyn.lolnova/intent"
     private val CLICK_CHANNEL = "tv_webview/click"
     private val DISPLAY_CHANNEL = "app/display_refresh"
     private var methodChannel: MethodChannel? = null

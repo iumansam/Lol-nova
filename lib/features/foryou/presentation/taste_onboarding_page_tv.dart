@@ -9,6 +9,7 @@ import '../../../data/recommendations/user_taste_profile.dart';
 import '../../../data/recommendations/daily_sections_generator.dart';
 import '../../../data/recommendations/regional_top10.dart';
 import 'taste_onboarding_page.dart' show HomeAlgorithmBus;
+import '../../../core/constants/app_secrets.dart';
 
 /// Onboarding de gustos adaptado a TV (D-pad / foco).
 /// Rejilla focuseable con auto-scroll y foco siempre centrado.
@@ -22,7 +23,7 @@ class TasteOnboardingPageTv extends StatefulWidget {
 }
 
 class _TasteOnboardingPageTvState extends State<TasteOnboardingPageTv> {
-  static const _tmdbKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const _tmdbKey = AppSecrets.tmdbApiKey;
   static const _cols = 7;          // más columnas => pósters más pequeños
   static const _visibleRows = 3;   // filas visibles (foco centrado)
 

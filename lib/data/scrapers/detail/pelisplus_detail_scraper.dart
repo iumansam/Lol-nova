@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../models/scraper/detalle_model.dart';
+import '../../../core/constants/app_secrets.dart';
 class DetallePelisPlus {
-  static const _tmdbKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const _tmdbKey = AppSecrets.tmdbApiKey;
   static const _base = 'https://www.pelisplushd.la';
   static const _ua =
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';

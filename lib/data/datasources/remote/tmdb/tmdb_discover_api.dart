@@ -3,12 +3,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/tmdb_apis.dart';
+import '../../../../core/constants/app_secrets.dart';
 
 /// Descubrir por tipo + género + orden (TMDB /discover).
 ///
 /// sortBy: popularity | year | title | rating
 class TmdbDiscoverService {
-  static const String _apiKeyFallback = 'a2d9bbed370d9f678e34006f8750a5a5'; // unused fallback
+  static const String _apiKeyFallback = AppSecrets.tmdbApiKey; // unused fallback
   static const String _base = 'https://api.themoviedb.org/3';
   static const String _imgBase = 'https://image.tmdb.org/t/p';
 

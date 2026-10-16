@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../../../core/constants/app_secrets.dart';
 
 class CuevanaService {
-  static const String _tmdbApiKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const String _tmdbApiKey = AppSecrets.tmdbApiKey;
   static const String _baseUrl = 'https://wv3.cuevana3.eu';
   static const String _playerApi =
       'https://www.modlyo.com/scraper/cuevana/player.php?url=';

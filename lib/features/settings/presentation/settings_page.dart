@@ -15,6 +15,7 @@ import 'supabase/supabase_section.dart';
 import 'notifications/notifications_section.dart'; // Notificaciones
 import 'actualizaciones/actualizaciones_page.dart'; // Actualizaciones
 import 'ai/ai_usage_section.dart';
+import 'lol_nova/lol_nova_section.dart';
 import '../../foryou/presentation/profile_recap_page.dart';
 import '../../addons/presentation/screens/addons_hub_page.dart';
 import '../../player/presentation/widgets/mini_player_service.dart';
@@ -1237,6 +1238,19 @@ class _ConfigPageState extends State<ConfigPage> {
                         ).build(),
                       ),
                     ),
+                  ),
+                  _buildSectionCard(
+                    title: 'LOL Nova',
+                    subtitle: 'Diagnóstico y copia de seguridad de la biblioteca',
+                    icon: Icons.auto_awesome_rounded,
+                    accent: const Color(0xFF7B5CFF),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const LolNovaSectionPage(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

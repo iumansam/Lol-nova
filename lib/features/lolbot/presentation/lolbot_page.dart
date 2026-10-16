@@ -6,6 +6,7 @@ import '../../../data/recommendations/user_taste_profile.dart';
 import '../../content/presentation/content_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../../core/constants/app_secrets.dart';
 
 /// Chat Lolbot (solo móvil). Misma UX que Kinobot de Kino.
 class LolbotPage extends StatefulWidget {
@@ -118,7 +119,7 @@ class _LolbotPageState extends State<LolbotPage> {
   Future<void> _openSuggestion(String title) async {
     // Buscar en TMDB (multi) para respetar movie vs tv
     try {
-      const key = 'a2d9bbed370d9f678e34006f8750a5a5';
+      const key = AppSecrets.tmdbApiKey;
       // 1) multi search — el resultado trae media_type
       final multiUri = Uri.parse(
         'https://api.themoviedb.org/3/search/multi'

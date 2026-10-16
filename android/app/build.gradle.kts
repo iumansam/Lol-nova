@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.lol"
+    namespace = "com.harlyn.lolnova"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.lol"
+        applicationId = "com.harlyn.lolnova"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode

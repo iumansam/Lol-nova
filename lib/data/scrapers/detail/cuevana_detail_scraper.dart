@@ -2,8 +2,9 @@
 import 'dart:convert';
 import '../base/base_detail_scraper.dart';
 import '../../models/scraper/detalle_model.dart';
+import '../../../core/constants/app_secrets.dart';
 class DetalleCuevana {
-  static const _tmdbKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const _tmdbKey = AppSecrets.tmdbApiKey;
   static const _base = 'https://wv3.cuevana3.eu';
 
   static Future<DetalleContenido> fetch({

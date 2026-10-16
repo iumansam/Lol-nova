@@ -5,6 +5,7 @@ import '../ai/ai_client.dart';
 import '../ai/daily_ai_gate.dart';
 import 'history_signals.dart';
 import 'user_taste_profile.dart';
+import '../../core/constants/app_secrets.dart';
 
 class HomeSectionItem {
   final int tmdbId;
@@ -73,7 +74,7 @@ class HomeSection {
 /// Si ya se generó hoy → solo lee cache. No regenera.
 class DailySectionsGenerator {
   static const _cacheKey = 'daily_home_sections_v1';
-  static const tmdbKeyFallback = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const tmdbKeyFallback = AppSecrets.tmdbApiKey;
 
   final AiClient ai;
   final String? tmdbApiKey;

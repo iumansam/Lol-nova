@@ -7,6 +7,7 @@ import '../../../data/ai/daily_ai_gate.dart';
 import '../../../data/recommendations/user_taste_profile.dart';
 import '../../../data/recommendations/daily_sections_generator.dart';
 import '../../../data/recommendations/regional_top10.dart';
+import '../../../core/constants/app_secrets.dart';
 
 /// Notifica al home que el algoritmo/secciones cambiaron.
 class HomeAlgorithmBus {
@@ -27,7 +28,7 @@ class TasteOnboardingPage extends StatefulWidget {
 }
 
 class _TasteOnboardingPageState extends State<TasteOnboardingPage> {
-  static const _tmdbKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const _tmdbKey = AppSecrets.tmdbApiKey;
 
   final List<_PosterItem> _movies = [];
   final List<_PosterItem> _series = [];

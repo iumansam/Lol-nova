@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../../core/constants/tmdb_apis.dart';
+import '../../../../core/constants/app_secrets.dart';
 
 /// Servicio TMDB de recomendaciones (mismo estilo que TmdbContentService).
 ///
@@ -10,7 +11,7 @@ import '../../../../core/constants/tmdb_apis.dart';
 ///
 /// Idioma: es-MX → en-US → es-ES
 class TmdbRecommendationsService {
-  static const String _apiKeyFallback = 'a2d9bbed370d9f678e34006f8750a5a5'; // unused fallback
+  static const String _apiKeyFallback = AppSecrets.tmdbApiKey; // unused fallback
   static const String _base = 'https://api.themoviedb.org/3';
 
   static const List<String> _langPriority = ['es-MX', 'en-US', 'es-ES'];

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../ai/ai_client.dart';
 import '../ai/daily_ai_gate.dart';
+import '../../core/constants/app_secrets.dart';
 
 /// Ítem del Top 10 del día.
 class Top10Item {
@@ -74,7 +75,7 @@ class RegionalTop10Service {
   static const _dayKey = 'regional_top10_day_v2'; // legado
   static const _tsKey = 'regional_top10_ts_v2'; // ms de última generación
   static const _ttlMs = 24 * 60 * 60 * 1000; // 24 horas
-  static const tmdbKeyFallback = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const tmdbKeyFallback = AppSecrets.tmdbApiKey;
   static const minVotesMovie = 500;
   static const minVotesTv = 200;
   static const minPopularity = 40.0;

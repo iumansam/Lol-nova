@@ -17,6 +17,7 @@ import 'widgets/cast_button.dart'; // ← CAST
 import 'widgets/mobile_skip_next_overlay.dart';
 import '../../../data/datasources/remote/tmdb/tmdb_player_api.dart';
 import 'player_controller.dart'; // Módulo independiente de servidores / HLS
+import '../data/playback_preferences.dart';
 import 'widgets/mini_player_service.dart';
 import '../../../supabase/supabase_data.dart';
 
@@ -82,6 +83,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   bool _subtitlesEnabled = true;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
+  double _playbackSpeed = PlaybackPreferences.defaultSpeed;
   String _errorMessage = '';
   bool _showControls = true;
   bool _isBuffering = false;
@@ -284,6 +286,31 @@ class _PlayerScreenState extends State<PlayerScreen> {
     }
     _loadRecommendationsFromGuardados();
     _loadSubtitlePrefs();
+    _loadPlaybackSpeed();
+  }
+
+  Future<void> _loadPlaybackSpeed() async {
+    final speed = await PlaybackPreferences.getSpeed();
+    if (!mounted) return;
+    if (_playbackSpeed != speed) setState(() => _playbackSpeed = speed);
+    await _applyPlaybackSpeed(speed);
+  }
+
+  /// Aplica la velocidad al controller (si está listo).
+  Future<void> _applyPlaybackSpeed(double speed) async {
+    final normalized = PlaybackPreferences.normalizeSpeed(speed);
+    if (!_controllerReady) return;
+    try {
+      await _controller.setPlaybackSpeed(normalized);
+    } catch (_) {}
+  }
+
+  /// Cicla la velocidad, la persiste y la aplica de inmediato.
+  Future<void> _cyclePlaybackSpeed() async {
+    final next = PlaybackPreferences.nextSpeed(_playbackSpeed);
+    setState(() => _playbackSpeed = next);
+    await PlaybackPreferences.setSpeed(next);
+    await _applyPlaybackSpeed(next);
   }
 
   void _setupSystemUi() {
@@ -1122,6 +1149,7 @@ if (passed.isNotEmpty) {
       _controller.addListener(_videoListener);
       _controllerReady = true;
       _startCacheTimer();
+      await _applyPlaybackSpeed(_playbackSpeed);
 
       final saved = await _getSavedPosition();
       if (saved != null && saved > 5) {
@@ -1857,6 +1885,7 @@ if (passed.isNotEmpty) {
       if (savedPos > const Duration(seconds: 2)) {
         await _controller.seekTo(savedPos);
       }
+      await _applyPlaybackSpeed(_playbackSpeed);
 
       if (!mounted || _isDisposing) return;
 
@@ -2452,6 +2481,27 @@ if (passed.isNotEmpty) {
                     onCastStarted: () {
                       if (_controllerReady && _isPlaying) _controller.pause();
                     },
+                  ),
+                  const SizedBox(width: 6),
+                  // ── VELOCIDAD DE REPRODUCCIÓN ────────────────────
+                  TextButton(
+                    onPressed: _cyclePlaybackSpeed,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white.withValues(alpha: 0.12),
+                      minimumSize: const Size(44, 34),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      PlaybackPreferences.label(_playbackSpeed),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),

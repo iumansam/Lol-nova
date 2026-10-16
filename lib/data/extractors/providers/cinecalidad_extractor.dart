@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../../../core/constants/app_secrets.dart';
 
 /// Servidores permitidos (mismo filtro que el PHP original).
 const _kAllowedServers = ['Vimeos', 'Hlswish', 'voe', 'Videoapp'];
 
-const _kTmdbApiKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+const _kTmdbApiKey = AppSecrets.tmdbApiKey;
 const _kTmdbBase = 'https://api.themoviedb.org/3';
 const _kCinecalidadBase = 'https://www.cinecalidad.am';
 

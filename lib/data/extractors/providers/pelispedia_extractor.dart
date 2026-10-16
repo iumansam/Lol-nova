@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../../core/constants/app_secrets.dart';
 
 /// Scraper nativo de Pelispedia (pelispedia.is).
 /// Replica el PHP: TMDB → candidatos slug → página con #aa-options →
@@ -9,7 +10,7 @@ import 'package:http/http.dart' as http;
 class PelispediaService {
   PelispediaService._();
 
-  static const _kTmdbKey = 'a2d9bbed370d9f678e34006f8750a5a5';
+  static const _kTmdbKey = AppSecrets.tmdbApiKey;
   static const _kTmdbBase = 'https://api.themoviedb.org/3';
   static const _kBase = 'https://pelispedia.is';
 
