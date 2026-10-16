@@ -9,12 +9,26 @@ class VersionService {
   static const String currentVersionName = "1.0.3"; // version_aceptada
   static const int currentVersionCode = 7; // version_code_aceptada (parche)
 
-  // URL de tu API
+  /// Auto-actualización desactivada por defecto en el fork "LOL Nova".
+  ///
+  /// El mecanismo original descarga e instala un APK alojado en un dominio de
+  /// terceros (`modlyo.com`), que corresponde a otra aplicación. Para un fork
+  /// con su propio `applicationId` esto es inseguro y no debe ejecutarse.
+  ///
+  /// Solo se habilita explícitamente en compilación:
+  ///   --dart-define=LOLNOVA_ENABLE_SELF_UPDATE=true
+  static const bool enableSelfUpdate = bool.fromEnvironment(
+    'LOLNOVA_ENABLE_SELF_UPDATE',
+    defaultValue: false,
+  );
+
+  // URL de tu API (solo se consulta si [enableSelfUpdate] está activo)
   static const String apiUrl =
       "https://www.modlyo.com/lol/versiones.php?tipo=lol";   
 
   /// Obtiene la última versión de tipo "lol" desde la API
   static Future<VersionInfo?> getLatestAnimeVersion() async {
+    if (!enableSelfUpdate) return null;
     try {
       final response = await http.get(Uri.parse(apiUrl));
 
@@ -74,7 +88,9 @@ class VersionService {
         hasVersionUpdate: false,
         hasPatchUpdate: false,
         latestVersion: null,
-        message: "No se pudo obtener información de actualización",
+        message: enableSelfUpdate
+            ? "No se pudo obtener información de actualización"
+            : "Las actualizaciones automáticas están desactivadas en esta build",
       );
     }
 

@@ -86,6 +86,11 @@ jobs:
       - name: flutter test
         run: flutter test --reporter expanded
 
+      - name: Generar iconos de LOL Nova
+        # Regenera los mipmaps/adaptive icon desde assets/logo.png (config en
+        # pubspec). Solo afecta al APK de este workflow, no al repositorio.
+        run: dart run flutter_launcher_icons
+
       - name: flutter build apk (debug)
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
