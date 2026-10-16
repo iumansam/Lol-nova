@@ -95,6 +95,15 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   List<_SubtitleCue> _subtitleCues = const [];
   String _currentSubtitleText = '';
+  // Notificador para repintar SOLO el subtítulo sin reconstruir toda la página
+  final ValueNotifier<String> _subtitleNotifier = ValueNotifier('');
+
+  void _setSubtitleText(String text) {
+    if (_currentSubtitleText != text) {
+      _currentSubtitleText = text;
+      _subtitleNotifier.value = text;
+    }
+  }
 
   // OpenSubtitles state
   String? _selectedSubtitleId;
@@ -1286,7 +1295,7 @@ if (passed.isNotEmpty) {
   // ─── Actualizar subtítulo con OFFSET ────────────────────────────────────
   void _updateCurrentSubtitle() {
     if (!_subtitlesEnabled || _subtitleCues.isEmpty) {
-      if (_currentSubtitleText.isNotEmpty) _currentSubtitleText = '';
+      _setSubtitleText('');
       return;
     }
 
@@ -1303,7 +1312,7 @@ if (passed.isNotEmpty) {
       if (adjustedPos < cue.start) break;
     }
     if (newText != _currentSubtitleText) {
-      _currentSubtitleText = newText;
+      _setSubtitleText(newText);
     }
   }
 
@@ -1335,7 +1344,7 @@ if (passed.isNotEmpty) {
           _selectedSubtitleLabel = lang.isNotEmpty
               ? lang.toUpperCase()
               : 'Subs';
-          _currentSubtitleText = '';
+          _setSubtitleText('');
         });
         await _saveActiveSubtitle(id: finalId, url: url, lang: lang);
       }
@@ -1464,7 +1473,7 @@ if (passed.isNotEmpty) {
         setState(() {
           _subtitlesEnabled = false;
           _subtitleCues = const [];
-          _currentSubtitleText = '';
+          _setSubtitleText('');
           _selectedSubtitleId = null;
           _selectedSubtitleLabel = 'Subs';
         });
@@ -1493,13 +1502,13 @@ if (passed.isNotEmpty) {
     if (shouldUpdatePosition) {
       _currentPosition = value.position;
       _positionNotifier.value = value.position;
-      _currentPosition = value.position;
       _lastPositionUpdateMs = nowMs;
       _updateCurrentSubtitle();
       final prevSkip = _showSkipIntro;
       _updateSkipIntroVisibility();
       if (prevSkip != _showSkipIntro) needsSetState = true;
-      needsSetState = true;
+      // El avance de posición ya no fuerza un rebuild completo de la página:
+      // la barra de progreso y el subtítulo escuchan sus propios notificadores.
 
       if (_totalDuration.inSeconds > 30) {
         final remaining = _totalDuration - _currentPosition;
@@ -1894,6 +1903,7 @@ if (passed.isNotEmpty) {
         _errorMessage = '';
         _totalDuration = _controller.value.duration;
         _currentPosition = savedPos;
+        _positionNotifier.value = savedPos;
         _showControls = true;
         _isPlaying = true;
       });
@@ -2092,6 +2102,7 @@ if (passed.isNotEmpty) {
     _hideControlsTimer?.cancel();
     _cacheTimer?.cancel();
     _positionNotifier.dispose();
+    _subtitleNotifier.dispose();
 
     // Backup: si se salió sin pasar por _showExitConfirmation, intentar guardar.
     // dispose() no puede ser async; usamos then para no bloquear el árbol.
@@ -2151,19 +2162,22 @@ if (passed.isNotEmpty) {
                 ),
               ),
             if (!_isLoading && _errorMessage.isEmpty && _subtitlesEnabled)
-              SubtitleWidget(
-                text: _currentSubtitleText,
-                isActive: _currentSubtitleText.isNotEmpty,
-                bottomPadding: _showControls
-                    ? (_showBottomPanel ? 220.0 : 120.0)
-                    : 36.0,
-                fontSize: _subtitleFontSize,
-                textColor: Colors.white,
-                strokeColor: Colors.black,
-                strokeWidth: 2.0,
-                fontWeight: _subtitleBold ? FontWeight.w700 : FontWeight.w500,
-                maxWidth: 640,
-                verticalOffset: _subtitleVerticalOffset,
+              ValueListenableBuilder<String>(
+                valueListenable: _subtitleNotifier,
+                builder: (context, subtitleText, child) => SubtitleWidget(
+                  text: subtitleText,
+                  isActive: subtitleText.isNotEmpty,
+                  bottomPadding: _showControls
+                      ? (_showBottomPanel ? 220.0 : 120.0)
+                      : 36.0,
+                  fontSize: _subtitleFontSize,
+                  textColor: Colors.white,
+                  strokeColor: Colors.black,
+                  strokeWidth: 2.0,
+                  fontWeight: _subtitleBold ? FontWeight.w700 : FontWeight.w500,
+                  maxWidth: 640,
+                  verticalOffset: _subtitleVerticalOffset,
+                ),
               ),
             // Controles debajo; skip intro / next ENCIMA para recibir toques
             if (!_isLoading && _errorMessage.isEmpty && _showControls)
@@ -2535,68 +2549,74 @@ if (passed.isNotEmpty) {
             const Spacer(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Text(
-                    _formatDuration(_currentPosition),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Expanded(
-                    child: SliderTheme(
-                      data: SliderThemeData(
-                        trackHeight: 3,
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 7,
+              child: ValueListenableBuilder<Duration>(
+                valueListenable: _positionNotifier,
+                builder: (context, position, child) {
+                  final total = _totalDuration;
+                  return Row(
+                    children: [
+                      Text(
+                        _formatDuration(position),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
-                        overlayShape: const RoundSliderOverlayShape(
-                          overlayRadius: 14,
-                        ),
-                        activeTrackColor: accentOrange,
-                        inactiveTrackColor: Colors.white.withValues(
-                          alpha: 0.25,
-                        ),
-                        thumbColor: accentOrange,
-                        overlayColor: accentOrange.withValues(alpha: 0.25),
                       ),
-                      child: Slider(
-                        value: _totalDuration.inSeconds > 0
-                            ? _currentPosition.inSeconds
-                                  .clamp(0, _totalDuration.inSeconds)
-                                  .toDouble()
-                            : 0.0,
-                        max: _totalDuration.inSeconds > 0
-                            ? _totalDuration.inSeconds.toDouble()
-                            : 1.0,
-                        onChanged: (v) {
-                          setState(() {
-                            _currentPosition = Duration(seconds: v.toInt());
-                          });
-                          _controller.seekTo(Duration(seconds: v.toInt()));
-                        },
-                        onChangeStart: (_) {
-                          _hideControlsTimer?.cancel();
-                          setState(() => _isDragging = true);
-                        },
-                        onChangeEnd: (_) {
-                          setState(() => _isDragging = false);
-                          _scheduleHideControls();
-                        },
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderThemeData(
+                            trackHeight: 3,
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 7,
+                            ),
+                            overlayShape: const RoundSliderOverlayShape(
+                              overlayRadius: 14,
+                            ),
+                            activeTrackColor: accentOrange,
+                            inactiveTrackColor: Colors.white.withValues(
+                              alpha: 0.25,
+                            ),
+                            thumbColor: accentOrange,
+                            overlayColor: accentOrange.withValues(alpha: 0.25),
+                          ),
+                          child: Slider(
+                            value: total.inSeconds > 0
+                                ? position.inSeconds
+                                      .clamp(0, total.inSeconds)
+                                      .toDouble()
+                                : 0.0,
+                            max: total.inSeconds > 0
+                                ? total.inSeconds.toDouble()
+                                : 1.0,
+                            onChanged: (v) {
+                              final d = Duration(seconds: v.toInt());
+                              _currentPosition = d;
+                              _positionNotifier.value = d;
+                              _controller.seekTo(d);
+                            },
+                            onChangeStart: (_) {
+                              _hideControlsTimer?.cancel();
+                              setState(() => _isDragging = true);
+                            },
+                            onChangeEnd: (_) {
+                              setState(() => _isDragging = false);
+                              _scheduleHideControls();
+                            },
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  Text(
-                    _formatDuration(_totalDuration - _currentPosition),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+                      Text(
+                        _formatDuration(total - position),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             const SizedBox(height: 6),
