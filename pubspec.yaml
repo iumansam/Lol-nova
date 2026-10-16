@@ -34,7 +34,6 @@ dependencies:
   video_player: ^2.9.2
   fvp: ^0.38.1
   chewie: ^1.8.5
-  libtorrent_flutter: ^2.0.0
   android_intent_plus: ^5.1.0
   webview_flutter: ^4.4.0
   webview_flutter_android: ^3.12.0
