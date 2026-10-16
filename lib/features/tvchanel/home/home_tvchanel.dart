@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../presentation/shared/widgets/lol_glass.dart';
 import '../config/m3u8_page.dart';
 import '../config/addon_chanel.dart';
 import '../data/tvchanel_repository.dart';
@@ -90,44 +91,59 @@ class _HomeTvChanelState extends State<HomeTvChanel> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Row(
-                children: [
-                  const Text(
-                    'TV en Vivo',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+              child: LolGlass(
+                borderRadius: 20,
+                padding: const EdgeInsets.fromLTRB(18, 8, 8, 8),
+                child: Row(
+                  children: [
+                    const Text(
+                      'TV en Vivo',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    tooltip: 'Listas M3U8',
-                    onPressed: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const M3u8Page()),
-                      );
-                      _load();
-                    },
-                    icon: const Icon(Icons.playlist_play_rounded, color: Colors.white),
-                  ),
-                  IconButton(
-                    tooltip: 'Addons',
-                    onPressed: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const AddonChanelPage()),
-                      );
-                      _load();
-                    },
-                    icon: const Icon(Icons.extension_rounded, color: Colors.white),
-                  ),
-                  IconButton(
-                    tooltip: 'Actualizar',
-                    onPressed: _load,
-                    icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                  ),
-                ],
+                    const Spacer(),
+                    IconButton(
+                      tooltip: 'Listas M3U8',
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const M3u8Page()),
+                        );
+                        _load();
+                      },
+                      icon: const Icon(
+                        Icons.playlist_play_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Addons',
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AddonChanelPage(),
+                          ),
+                        );
+                        _load();
+                      },
+                      icon: const Icon(
+                        Icons.extension_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Actualizar',
+                      onPressed: _load,
+                      icon: const Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Expanded(
@@ -246,17 +262,33 @@ class _CategoryBlock extends StatelessWidget {
                     child: Column(
                       children: [
                         Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: ch.logo != null &&
-                                    ch.logo!.startsWith('http')
-                                ? Image.network(
-                                    ch.logo!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    errorBuilder: (_, __, ___) => _fb(),
-                                  )
-                                : _fb(),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.12),
+                                width: 0.8,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.35),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(13),
+                              child: ch.logo != null &&
+                                      ch.logo!.startsWith('http')
+                                  ? Image.network(
+                                      ch.logo!,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      errorBuilder: (_, __, ___) => _fb(),
+                                    )
+                                  : _fb(),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 6),
