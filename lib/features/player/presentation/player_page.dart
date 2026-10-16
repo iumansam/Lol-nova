@@ -1643,6 +1643,8 @@ if (passed.isNotEmpty) {
     final id = idcontenido ?? _resolvedId;
     final media = tipo ?? _mediaType;
 
+    var switched = false;
+
     await showDialog(
       context: context,
       builder: (_) => ServidoresModal(
@@ -1656,13 +1658,67 @@ if (passed.isNotEmpty) {
         esSiguienteCapitulo: isNext,
         backdropUrl: _backdropUrl,
         logoUrl: _logoUrl,
+        onSelectFromPlayer: (srv) {
+          switched = true;
+          unawaited(_switchToServer(srv));
+        },
       ),
     );
 
-    if (mounted && !_isDisposing && wasPlaying) {
+    // Si se eligió otra fuente, el player ya la está reproduciendo: no
+    // reanudar el controller viejo.
+    if (!switched && mounted && !_isDisposing && wasPlaying) {
       _controller.play();
       _scheduleHideControls();
     }
+  }
+
+  /// Cambia de fuente desde el player SIN abrir el WebView: resuelve el
+  /// servidor elegido (URL directa o extractor interno) y lo reproduce aquí.
+  Future<void> _switchToServer(Map<String, dynamic> srv) async {
+    if (!mounted || _isDisposing) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+      _allServersFailed = false;
+    });
+
+    try {
+      final playable = await _serverLoader.tryResolveServer(
+        srv,
+        context: mounted ? context : null,
+      );
+      if (!mounted || _isDisposing) return;
+
+      if (playable != null && playable.url.isNotEmpty) {
+        final headers = <String, String>{
+          if (widget.headers != null) ...widget.headers!,
+          ...playable.headers,
+        };
+        _activeUrl = playable.url;
+        _activeHeaders = headers;
+        final idx = _fallbackServers.indexWhere(
+          (s) =>
+              s['servidor_url']?.toString() == srv['servidor_url']?.toString(),
+        );
+        if (idx >= 0) _fallbackIndex = idx;
+        if (playable.idioma.isNotEmpty) {
+          final n = _normalizeIdioma(playable.idioma);
+          if (n.isNotEmpty) _idioma = n.toUpperCase();
+        }
+        await _startControllerWithUrl(playable.url, headers);
+        return;
+      }
+    } catch (e) {
+      debugPrint('switchToServer error: $e');
+    }
+
+    if (!mounted || _isDisposing) return;
+    setState(() {
+      _isLoading = false;
+      _errorMessage = 'No se pudo reproducir ese servidor. Prueba otro.';
+    });
   }
 
   void _openInfoModal() {

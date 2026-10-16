@@ -252,6 +252,9 @@ class ServidoresModal extends StatefulWidget {
   final String? backdropUrl;
   final String? posterUrl;
   final String? logoUrl;
+  /// Cuando se abre desde el reproductor, permite devolver el servidor
+  /// elegido al player para cambiar de fuente SIN abrir el WebView.
+  final void Function(Map<String, dynamic> servidor)? onSelectFromPlayer;
 
   const ServidoresModal({
     super.key,
@@ -267,6 +270,7 @@ class ServidoresModal extends StatefulWidget {
     this.backdropUrl,
     this.posterUrl,
     this.logoUrl,
+    this.onSelectFromPlayer,
   });
 
   @override
@@ -940,6 +944,16 @@ class _ServidoresModalState extends State<ServidoresModal>
   Future<void> _openServer(Map<String, dynamic> servidor) async {
     if (_navigating || !mounted) return;
     _navigating = true;
+
+    // ── Abierto desde el reproductor: devolver el servidor elegido y
+    //    cambiar de fuente en el player nativo (sin abrir WebView) ──────
+    if (widget.fromPlayer && widget.onSelectFromPlayer != null) {
+      final cb = widget.onSelectFromPlayer!;
+      final picked = Map<String, dynamic>.from(servidor);
+      if (mounted) Navigator.of(context).pop();
+      cb(picked);
+      return;
+    }
 
     final embedUrl = servidor['servidor_url']?.toString() ?? '';
     final nombre = servidor['servidor_nombre']?.toString() ?? 'Servidor';
