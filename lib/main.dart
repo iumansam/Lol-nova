@@ -26,8 +26,58 @@ const String kModeKey = 'app_mode'; // "mobile" | "tv"
 const String kDisclaimerKey = 'disclaimer_accepted';
 const String kTasteOnboardingKey = 'taste_onboarding_done_v1';
 
+/// Marca de la siembra inicial de preferencias de LOL Nova.
+const String kLolNovaSeedKey = 'lolnova_defaults_seed_v1';
+
+/// Configuración inicial sensata para el fork LOL Nova: activa las fuentes
+/// nativas (varias de ellas en español/latino) y permite varios servidores
+/// por idioma. Se aplica UNA sola vez: si el usuario luego cambia algo, no se
+/// vuelve a sobrescribir.
+Future<void> _seedLolNovaDefaults() async {
+  final prefs = await SharedPreferences.getInstance();
+  if (prefs.getBool(kLolNovaSeedKey) ?? false) return;
+
+  await prefs.setBool('native_sources_enabled', true);
+
+  const sourceKeys = <String>[
+    'embed69_enabled',
+    'poseidon_enabled',
+    'cuevana_enabled',
+    'unlimplay_enabled',
+    'cinesrc_enabled',
+    'cinecalidad_enabled',
+    'tioplus_enabled',
+    'fuegocine_enabled',
+    'pelisplus_enabled',
+    'pelispedia_enabled',
+    'seriesmetro_enabled',
+    'smartpelis_enabled',
+    'hackstore_enabled',
+  ];
+  for (final key in sourceKeys) {
+    await prefs.setBool(key, true);
+  }
+
+  // Mostrar todos los servidores, no solo uno por idioma.
+  await prefs.setBool('un_servidor_por_idioma', false);
+  await prefs.setBool('mostrar_servidores_player', true);
+  await prefs.setBool('verificar_servidores', true);
+
+  // Español por defecto y selección automática de la mejor fuente.
+  await prefs.setBool('idioma_predeterminado_enabled', true);
+  await prefs.setString('idioma_predeterminado', 'es_MX');
+  await prefs.setString('idioma_audio_predeterminado', 'latino');
+  await prefs.setString('subtitulo_predeterminado', 'es');
+  await prefs.setString('seleccionar_servidores', 'auto');
+
+  await prefs.setBool(kLolNovaSeedKey, true);
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Preferencias iniciales de LOL Nova (una sola vez).
+  await _seedLolNovaDefaults();
 
   // Supabase central
   await AppSupabase.init();
