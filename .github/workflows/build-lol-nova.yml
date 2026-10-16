@@ -58,7 +58,8 @@ jobs:
         run: flutter doctor -v
 
       - name: Aceptar licencias Android (si hicieran falta)
-        run: yes | flutter doctor --android-licenses >/dev/null 2>&1 || true
+        run: |
+          yes | flutter doctor --android-licenses >/dev/null 2>&1 || true
 
       - name: flutter pub get
         run: flutter pub get
