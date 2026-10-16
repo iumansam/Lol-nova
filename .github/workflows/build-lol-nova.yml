@@ -12,6 +12,10 @@ on:
         description: 'Subir el APK debug como artefacto del workflow'
         type: boolean
         default: true
+      emit_keystore:
+        description: 'Emitir el keystore de debug como artefacto (uso puntual)'
+        type: boolean
+        default: false
 
 # Un solo build por rama a la vez.
 concurrency:
@@ -64,6 +68,22 @@ jobs:
       - name: flutter pub get
         run: flutter pub get
 
+      - name: Preparar keystore de debug estable
+        # Firma reproducible: si el repo aún no trae el keystore, se genera una
+        # vez y se emite como artefacto para commitearlo. Así las actualizaciones
+        # se instalan encima sin conflicto de firma.
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.android" android/app
+          KS="android/app/lol-nova-debug.keystore"
+          if [ ! -f "$KS" ]; then
+            keytool -genkeypair -v -keystore "$KS" \
+              -storepass android -keypass android \
+              -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          cp "$KS" "$HOME/.android/debug.keystore"
+
       - name: Aviso si falta el secret TMDB_API_KEY
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
@@ -98,6 +118,7 @@ jobs:
         run: |
           set -euo pipefail
           flutter build apk --debug \
+            --target-platform android-arm64 \
             --dart-define=TMDB_API_KEY="${TMDB_API_KEY:-}"
 
       - name: Verificar applicationId, etiqueta y firma del APK
@@ -143,3 +164,12 @@ jobs:
           path: build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Emitir keystore de debug (una sola vez)
+        if: ${{ inputs.emit_keystore }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lolnova-keystore
+          path: android/app/lol-nova-debug.keystore
+          if-no-files-found: error
+          retention-days: 7
